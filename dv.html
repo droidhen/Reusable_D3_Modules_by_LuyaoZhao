@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>D3 Test</title>
+		<script type="text/javascript" src="lib/d3.min.js"></script>
+		<style type = "text/css">
+			body {
+				font: 12px Arial;
+			}
+			path {
+				stroke: steelblue;
+				stroke-width: 2;
+				fill: none;
+			}
+			.axis path, .axis line {
+				fill: none;
+				stroke: grey;
+				stroke-width: 1;
+				shape-rendering: crispEdges;
+			}
+			.area {
+				fill: #e7e7e7;
+				stroke-width: 0;
+			}
+			.grid .tick {
+				stroke: lightgrey;
+				opacity: 0.7;
+			}
+			.grid path {
+				stroke-width: 0;
+			}
+			.x.axis line {
+				stroke: #fff;
+			}
+			.x.axis .minor {
+				stroke-opacity: .5;
+			}
+
+		</style>
+	</head>
+	<body>
+		<script type="text/javascript">
+			var data = [{
+				"date" : "1day",
+				"pnl" : 382.13
+			}, {
+				"date" : "15day",
+				"pnl" : 421.73
+			}, {
+				"date" : "1m",
+				"pnl" : 582.13
+			}, {
+				"date" : "2m",
+				"pnl" : -628.44
+			}, {
+				"date" : "3m",
+				"pnl" : -636.23
+			}, {
+				"date" : "4m",
+				"pnl" : -624.31
+			}, {
+				"date" : "5m",
+				"pnl" : 629.32
+			}, {
+				"date" : "6m",
+				"pnl" : 542.44
+			}, {
+				"date" : "7m",
+				"pnl" : -525.76
+			}, {
+				"date" : "8m",
+				"pnl" : -325.76
+			}];
+			var margin = {
+				top : 50,
+				right : 50,
+				bottom : 50,
+				left : 50
+			};
+			width = 600 - margin.left - margin.right;
+			height = 270 - margin.top - margin.bottom;
+
+			//var parseDate = d3.time.format("%d-%b-%y").parse;
+
+			var xScale = d3.scale.ordinal().rangePoints([0, width], 0).domain(data.map(function(d) {
+				return d.date;
+			}));
+			var yScale = d3.scale.linear().range([height, 0]).domain(d3.extent(data, function(d) {
+				return d.pnl;
+			})).nice();
+
+			var xAxis = d3.svg.axis().scale(xScale).orient("bottom").ticks(5);
+			var yAxis = d3.svg.axis().scale(yScale).orient("left").ticks(5);
+
+			function make_x_axis() {
+				return d3.svg.axis().scale(xScale).orient("bottom").ticks(5);
+			}
+
+			function make_y_axis() {
+				return d3.svg.axis().scale(yScale).orient("left").ticks(5);
+			}
+
+			var valueline = d3.svg.line().interpolate("monotone").x(function(d) {
+				return xScale(d.date);
+			}).y(function(d) {
+				return yScale(d.pnl);
+			});
+
+			var area = d3.svg.area().interpolate("monotone").x(function(d) {
+				return xScale(d.date);
+			}).y0(function() {
+				return yScale(0);
+			}).y1(function(d) {
+				return yScale(d.pnl);
+			});
+
+			var svg = d3.select("body").append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+			//x label
+			svg.append("text").attr("transform", "translate(" + (width / 2) + "," + (height + margin.bottom) + ")").style("text-anchor", "middle").text("Tenor");
+			//y label
+			svg.append("text").attr("transform", "rotate(-90)").attr("y", 0 - margin.left).attr("x", 0 - (height / 2)).attr("dy", "1em").style("text-anchor", "middle").text("Value");
+			//chart label
+			svg.append("text").attr("x", (0)).attr("y", 0 - (margin.top / 2 )).attr("text-anchor", "middle").style("font-size", "16px").text("Sensitivities");
+
+			//Add the X Axis
+			svg.append("g").attr("class", "x axis").attr("transform", "translate(0," + height + ")").call(xAxis);
+			//Add the Y Axis
+			svg.append("g").attr("class", "y axis").call(yAxis);
+			//x grid
+			svg.append("g").attr("class", "grid").attr("transform", "translate(0," + height + ")").call(make_x_axis().tickSize(-height, 0, 0).tickFormat(""))
+			//y grid
+			svg.append("g").attr("class", "grid").call(make_y_axis().tickSize(-width, 0, 0).tickFormat(""))
+			//Add the valueline path
+			svg.append("g").append("path").attr("d", valueline(data));
+			//svg.append("path").datum(data).attr("class", "area").attr("d", area);
+
+			var points = svg.append("g").selectAll(".point").data(data).enter().append("svg:circle").attr("stroke", "black").attr("fill", function(d, i) {
+				return "red"
+			}).attr("cx", function(d, i) {
+				return xScale(d.date)
+			}).attr("cy", function(d, i) {
+				return yScale(d.pnl)
+			}).attr("r", function(d, i) {
+				return 2
+			});
+
+		</script>
+	</body>
+</html>
