@@ -176,8 +176,10 @@
                         .attr("y2", height).attr("stroke", "steelblue").attr("stroke-linecap","round").attr("stroke-dasharray","1, 1");;
                }
 			}).on("mouseout", function(){
-				d3.select(this).transition().duration(300).attr("opacity", 0).each("end",  hideLine);
+				var self=this;
+				d3.select(self).transition().duration(300).attr("r", 2).each("end",  hideLine);
 				function hideLine(){
+					d3.select(self).attr("opacity", 0);
 					svg.select(".dotted-line").select("line").remove();
 					svg.select(".dotted-line").remove();
 				}
